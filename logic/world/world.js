@@ -1,8 +1,8 @@
-import Background from "./background/background.js"
-import Entities from "./entities/entities.js"
-import Enemies from "./characters/enemies.js"
-import Sharky from "./characters/sharky.js"
-import Collectibles from "./entities/collectibles.js"
+import Background from "./background/background.js";
+import Entities from "./entities/entities.js";
+import Collectibles from "./entities/collectibles.js";
+import Enemies from "./characters/enemies.js";
+import Sharky from "./characters/sharky.js";
 
 let camera_x = 0;
 let DEBUG_HITBOXES = true;
@@ -28,8 +28,11 @@ function loadWorld(ctx, canvas) {
 
     Background(ctx);
     Entities(ctx);
+    Collectibles(ctx);
     Enemies(ctx);
+
     ctx.restore();
+    
     camera_x = Sharky(ctx, camera_x);
 
     requestAnimationFrame(() => loadWorld(ctx, canvas))
