@@ -2,8 +2,10 @@ import Background from "./background/background.js"
 import Entities from "./entities/entities.js"
 import Enemies from "./characters/enemies.js"
 import Sharky from "./characters/sharky.js"
+import Collectibles from "./entities/collectibles.js"
 
 let camera_x = 0;
+let DEBUG_HITBOXES = true;
 
 export default function loadCanvas() {
     const canvas = document.getElementById('gameCanvas');

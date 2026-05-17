@@ -1,15 +1,16 @@
 import Keyboard from "../lib/classes/keyboard/keyboard.class.js";
 import loadCanvas from "./world/world.js"
 
-function initializeElPoloLoco() {
+function initializeSharky() {
     loadCanvas();
 }
 
-window.onload = initializeElPoloLoco();
+window.addEventListener("load", initializeSharky)
 
 window.addEventListener("keydown", (e) => {
-  
-    // console.log(e);
+    if ([32, 37, 38, 39, 40].includes(e.keyCode)) {
+        e.preventDefault();
+    }
     if (e.keyCode == 32) {
         Keyboard.SPACE = true
     }
@@ -29,16 +30,10 @@ window.addEventListener("keydown", (e) => {
         Keyboard.D = true
     }
 
-    // console.log('PRESSDOWN SPACE:' + Keyboard.SPACE);
-    // console.log('PRESSDOWN UP:' + Keyboard.UP);
-    // console.log('PRESSDOWN RIGHT:' + Keyboard.RIGHT);
-    // console.log('PRESSDOWN LEFT:' + Keyboard.LEFT);
-    // console.log('PRESSDOWN DOWN:' + Keyboard.DOWN);
-    // console.log('PRESSDOWN D:' + Keyboard.D);
 })
 
 window.addEventListener("keyup", (e) => {
-    
+
     if (e.keyCode == 32) {
         Keyboard.SPACE = false
     }
@@ -58,10 +53,4 @@ window.addEventListener("keyup", (e) => {
         Keyboard.D = false
     }
 
-    // console.log('PRESSUP SPACE:' + Keyboard.SPACE);
-    // console.log('PRESSUP UP:' + Keyboard.UP);
-    // console.log('PRESSUP RIGHT:' + Keyboard.RIGHT);
-    // console.log('PRESSUP LEFT:' + Keyboard.LEFT);
-    // console.log('PRESSUP DOWN:' + Keyboard.DOWN);
-    // console.log('PRESSUP D:' + Keyboard.D);
 })
