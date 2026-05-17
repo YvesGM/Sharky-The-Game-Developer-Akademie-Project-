@@ -29,6 +29,9 @@ window.addEventListener("keydown", (e) => {
     if (e.keyCode == 68) {
         Keyboard.D = true
     }
+    if (e.keyCode == 82) {
+        Keyboard.RESTART = true
+    }
 
 })
 
@@ -51,6 +54,9 @@ window.addEventListener("keyup", (e) => {
     }
     if (e.keyCode == 68) {
         Keyboard.D = false
+    }
+    if (e.keyCode == 82) {
+        Keyboard.RESTART = false
     }
 
 })
