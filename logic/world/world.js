@@ -4,6 +4,7 @@ import Collectibles from "./entities/collectibles.js";
 import Enemies from "./characters/enemies.js";
 import Sharky from "./characters/sharky.js";
 import Keyboard from "../../lib/classes/keyboard/keyboard.class.js";
+import HUD from "./hud/hud.js";
 import { SHARKY } from "../../lib/configs/characters/sharky.configs.js";
 import { ENEMIES } from "../../lib/configs/characters/enemy.configs.js";
 import { ENTITIES } from "../../lib/configs/entities/entity.configs.js";
@@ -58,7 +59,7 @@ const gameState = {
 
         ENEMIES.forEach(enemy => {
             if (!enemy.isDead && sharky.isColliding(enemy, camera_x)) {
-                sharky.hit(enemy.damage || 15);
+                sharky.hit(enemy.damage || 15, enemy);
             }
         });
     },
@@ -188,19 +189,20 @@ function loadWorld(ctx, canvas) {
     Collectibles(ctx);
     Enemies(ctx);
 
+
     if (DEBUG_HITBOXES) {
         drawWorldHitboxes(ctx);
     }
 
     ctx.restore();
 
-    camera_x = Sharky(ctx, camera_x);
+    camera_x = Sharky(ctx, camera_x, gameState);
 
     if (DEBUG_HITBOXES) {
         drawSharkyHitbox(ctx);
     }
 
-    drawHud(ctx);
+    HUD(ctx);
 
     requestAnimationFrame(() => loadWorld(ctx, canvas))
 }
@@ -214,32 +216,32 @@ function loadWorld(ctx, canvas) {
  * @param {CanvasRenderingContext2D} ctx - The 2D rendering context of the canvas.
  * @returns {void}
  */
-function drawHud(ctx) {
-    let sharky = gameState.getSharky();
-    let boss = ENEMIES.find(enemy => enemy.health !== undefined);
+// function drawHud(ctx) {
+//     let sharky = gameState.getSharky();
+//     let boss = ENEMIES.find(enemy => enemy.health !== undefined);
 
-    drawBar(ctx, 40, 38, 420, 34, sharky.health, 100, 'Health');
-    drawBar(ctx, 40, 88, 260, 28, sharky.poison, 5, 'Poison');
+//     drawBar(ctx, 40, 38, 420, 34, sharky.health, 100, 'Health');
+//     drawBar(ctx, 40, 88, 260, 28, sharky.poison, 5, 'Poison');
 
-    ctx.font = '34px Arial';
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText(`Coins: ${sharky.coins}/${COINS.length}`, 40, 165);
+//     ctx.font = '34px Arial';
+//     ctx.fillStyle = '#ffffff';
+//     ctx.fillText(`Coins: ${sharky.coins}/${COINS.length}`, 40, 165);
 
-    if (boss && !boss.isDead && camera_x > 14500) {
-        drawBar(ctx, 1240, 38, 620, 34, boss.health, 100, 'Boss');
-    };
+//     if (boss && !boss.isDead && camera_x > 14500) {
+//         drawBar(ctx, 1240, 38, 620, 34, boss.health, 100, 'Boss');
+//     };
 
-    if (gameState.message) {
-        ctx.save();
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
-        ctx.fillRect(0, 0, 1920, 1080);
-        ctx.fillStyle = '#ffffff';
-        ctx.textAlign = 'center';
-        ctx.font = '72px Arial';
-        ctx.fillText(gameState.message, 960, 520);
-        ctx.restore();
-    };
-}
+//     if (gameState.message) {
+//         ctx.save();
+//         ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+//         ctx.fillRect(0, 0, 1920, 1080);
+//         ctx.fillStyle = '#ffffff';
+//         ctx.textAlign = 'center';
+//         ctx.font = '72px Arial';
+//         ctx.fillText(gameState.message, 960, 520);
+//         ctx.restore();
+//     };
+// }
 
 /**
  * Draws a simple progress bar with a label.
@@ -321,7 +323,7 @@ function drawSharkyHitbox(ctx) {
     let sharky = gameState.getSharky();
 
     if (typeof sharky.getHitbox === 'function') {
-        drawDebugBox(ctx, sharky.getHitbox(camera_x), '#00ffff', 'Sharky');
+        drawDebugBox(ctx, sharky.getHitbox(0), '#00ffff', 'Sharky');
         return;
     }
 
