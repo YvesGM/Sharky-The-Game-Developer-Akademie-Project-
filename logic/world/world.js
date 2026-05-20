@@ -9,9 +9,38 @@ import { ENEMIES } from "../../lib/configs/characters/enemy.configs.js";
 import { ENTITIES } from "../../lib/configs/entities/entity.configs.js";
 import { COINS, POISONS } from "../../lib/configs/entities/collectibles.configs.js";
 
+/**
+ * Stores the current horizontal camera offset of the game world.
+ * Used to move the visible world relative to Sharky's position.
+ *
+ * @type {number}
+ */
 let camera_x = 0;
+
+/**
+ * Enables or disables visual debug hitboxes for entities, enemies,
+ * collectibles and Sharky.
+ *
+ * @type {boolean}
+ */
 let DEBUG_HITBOXES = true;
 
+/**
+ * Stores and controls the current game state.
+ * Handles collisions, collectibles, attacks, win/lose checks and restart logic.
+ *
+ * @type {{
+ *   status: string,
+ *   message: string,
+ *   getSharky: Function,
+ *   isBlocked: Function,
+ *   checkCollisions: Function,
+ *   checkCollectibles: Function,
+ *   checkAttacks: Function,
+ *   checkStatus: Function,
+ *   restart: Function
+ * }}
+ */
 const gameState = {
     status: 'running',
     message: '',
@@ -108,6 +137,12 @@ const gameState = {
     }
 }
 
+/**
+ * Initializes the canvas, applies device pixel ratio scaling
+ * and starts the main game loop.
+ *
+ * @returns {void}
+ */
 export default function loadCanvas() {
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
@@ -121,6 +156,16 @@ export default function loadCanvas() {
     loadWorld(ctx, canvas);
 }
 
+/**
+ * Main game loop.
+ *
+ * Clears the canvas, updates game logic, renders the world,
+ * renders Sharky, draws the HUD and requests the next animation frame.
+ *
+ * @param {CanvasRenderingContext2D} ctx - The 2D rendering context of the canvas.
+ * @param {HTMLCanvasElement} canvas - The game canvas element.
+ * @returns {void}
+ */
 function loadWorld(ctx, canvas) {
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
@@ -154,12 +199,21 @@ function loadWorld(ctx, canvas) {
     if (DEBUG_HITBOXES) {
         drawSharkyHitbox(ctx);
     }
-    
+
     drawHud(ctx);
 
     requestAnimationFrame(() => loadWorld(ctx, canvas))
 }
 
+/**
+ * Draws the game HUD.
+ *
+ * Displays Sharky's health, poison amount, collected coins,
+ * boss health and game status messages.
+ *
+ * @param {CanvasRenderingContext2D} ctx - The 2D rendering context of the canvas.
+ * @returns {void}
+ */
 function drawHud(ctx) {
     let sharky = gameState.getSharky();
     let boss = ENEMIES.find(enemy => enemy.health !== undefined);
@@ -187,6 +241,21 @@ function drawHud(ctx) {
     };
 }
 
+/**
+ * Draws a simple progress bar with a label.
+ *
+ * Used for health, poison and boss health.
+ *
+ * @param {CanvasRenderingContext2D} ctx - The 2D rendering context of the canvas.
+ * @param {number} x - The x position of the bar.
+ * @param {number} y - The y position of the bar.
+ * @param {number} w - The width of the bar.
+ * @param {number} h - The height of the bar.
+ * @param {number} value - The current value.
+ * @param {number} maxValue - The maximum possible value.
+ * @param {string} label - The text label displayed above the bar.
+ * @returns {void}
+ */
 function drawBar(ctx, x, y, w, h, value, maxValue, label) {
     let percent = Math.max(0, Math.min(value / maxValue, 1));
 
@@ -204,6 +273,15 @@ function drawBar(ctx, x, y, w, h, value, maxValue, label) {
     ctx.restore();
 }
 
+/**
+ * Draws debug hitboxes for all world objects.
+ *
+ * Includes static entities, enemies, coins and poison bottles.
+ * Only visible when DEBUG_HITBOXES is enabled.
+ *
+ * @param {CanvasRenderingContext2D} ctx - The 2D rendering context of the canvas.
+ * @returns {void}
+ */
 function drawWorldHitboxes(ctx) {
     ENTITIES.forEach(entity => {
         drawDebugBox(ctx, entity, '#ff0000', 'Entity');
@@ -230,6 +308,15 @@ function drawWorldHitboxes(ctx) {
     });
 }
 
+/**
+ * Draws Sharky's debug hitbox.
+ *
+ * Uses Sharky's own getHitbox method if available.
+ * Otherwise falls back to Sharky's raw object dimensions.
+ *
+ * @param {CanvasRenderingContext2D} ctx - The 2D rendering context of the canvas.
+ * @returns {void}
+ */
 function drawSharkyHitbox(ctx) {
     let sharky = gameState.getSharky();
 
@@ -241,13 +328,31 @@ function drawSharkyHitbox(ctx) {
     drawDebugBox(ctx, sharky, '#00ffff', 'Sharky');
 }
 
-function drawDebugBox(ctx, box, color, label = '') {
-    if (!box) return;
+/**
+ * Draws a rectangular debug box with an optional label.
+ *
+ * Accepts objects using either w/h or width/height as size properties.
+ * If required position or size values are missing, nothing is drawn.
+ *
+ * @param {CanvasRenderingContext2D} ctx - The 2D rendering context of the canvas.
+ * @param {Object} debugBox - The object containing x, y, width/height or w/h values.
+ * @param {number} debugBox.x - The x position of the box.
+ * @param {number} debugBox.y - The y position of the box.
+ * @param {number} [debugBox.w] - The width of the box.
+ * @param {number} [box.h] - The height of the box.
+ * @param {number} [box.width] - Alternative width property.
+ * @param {number} [box.height] - Alternative height property.
+ * @param {string} color - The stroke and text color of the debug box.
+ * @param {string} [label=''] - Optional label displayed above the box.
+ * @returns {void}
+ */
+function drawDebugBox(ctx, debugBox, color, label = '') {
+    if (!debugBox) return;
 
-    let x = box.x;
-    let y = box.y;
-    let w = box.w ?? box.width;
-    let h = box.h ?? box.height;
+    let x = debugBox.x;
+    let y = debugBox.y;
+    let w = debugBox.w ?? debugBox.width;
+    let h = debugBox.h ?? debugBox.height;
 
     if (
         x === undefined ||
