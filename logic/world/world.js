@@ -3,12 +3,14 @@ import Entities from "./entities/entities.js";
 import Collectibles from "./entities/collectibles.js";
 import Enemies from "./characters/enemies.js";
 import Sharky from "./characters/sharky.js";
+import Bubble from "../../lib/classes/entities/bubble.class.js";
 import Keyboard from "../../lib/classes/keyboard/keyboard.class.js";
 import HUD from "./hud/hud.js";
 import { SHARKY } from "../../lib/configs/characters/sharky.configs.js";
 import { ENEMIES } from "../../lib/configs/characters/enemy.configs.js";
 import { ENTITIES } from "../../lib/configs/entities/entity.configs.js";
 import { COINS, POISONS } from "../../lib/configs/entities/collectibles.configs.js";
+import { BUBBLES, BUBBLE_IMAGES } from "../../lib/configs/entities/bubble.configs.js";
 
 /**
  * Stores the current horizontal camera offset of the game world.
@@ -58,8 +60,18 @@ const gameState = {
         let sharky = this.getSharky();
 
         ENEMIES.forEach(enemy => {
-            if (!enemy.isDead && sharky.isColliding(enemy, camera_x)) {
+            if (enemy.isDead) return;
+
+            if (sharky.isColliding(enemy, camera_x)) {
+                if (enemy.enemyType === 'jellyfish' && sharky.attackType === 'fin' && sharky.isAttacking()) {
+                    return;
+                }
+
                 sharky.hit(enemy.damage || 15, enemy);
+
+                if (enemy.enemyType === 'jellyfish') {
+                    enemy.startSuperDangerous();
+                }
             }
         });
     },
@@ -87,11 +99,16 @@ const gameState = {
 
         if (!sharky.isAttacking()) return;
 
+        if (sharky.attackType === 'bubble' && sharky.canSpawnBubble()) {
+            this.spawnBubble();
+        }
+
         ENEMIES.forEach(enemy => {
             if (enemy.isDead) return;
 
             let attackBox = sharky.getAttackBox(camera_x);
             let enemyBox = enemy.getHitbox();
+
             let isHit = attackBox.x + attackBox.w > enemyBox.x &&
                 attackBox.x < enemyBox.x + enemyBox.w &&
                 attackBox.y + attackBox.h > enemyBox.y &&
@@ -107,8 +124,28 @@ const gameState = {
                 return;
             }
 
+            if (enemy.enemyType === 'jellyfish') {
+                if (sharky.attackType === 'fin') {
+                    if (!sharky.canApplyFinHit()) return;
+                    if (enemy.lastHitAttackId === sharky.currentAttackId) return;
+
+                    enemy.lastHitAttackId = sharky.currentAttackId;
+                    enemy.startSuperDangerous();
+                    sharky.scheduleShockDamage(enemy.damage || 15, enemy, 350);
+                    return;
+                }
+
+                if (sharky.attackType === 'bubble') {
+                    return;
+                }
+            }
+
             if (sharky.attackType === 'fin') {
-                enemy.isDead = true;
+                if (!sharky.canApplyFinHit()) return;
+                if (enemy.lastHitAttackId === sharky.currentAttackId) return;
+
+                enemy.lastHitAttackId = sharky.currentAttackId;
+                enemy.die();
             }
         });
     },
@@ -131,6 +168,65 @@ const gameState = {
 
         this.status = 'running';
         this.message = '';
+    },
+
+    spawnBubble() {
+        let sharky = this.getSharky();
+
+        if (sharky.bubbleSpawned) return;
+
+        let direction = sharky.otherDirection ? -1 : 1;
+        let bubbleW = 120;
+        let bubbleH = 120;
+
+        let sharkyBox = sharky.getHitbox(camera_x);
+
+        let x = direction > 0
+            ? sharkyBox.x + sharkyBox.w
+            : sharkyBox.x - bubbleW;
+
+        let y = sharkyBox.y + sharkyBox.h / 2 - bubbleH / 2;
+
+        BUBBLES.push(
+            new Bubble(
+                x,
+                y,
+                bubbleW,
+                bubbleH,
+                12,
+                direction,
+                BUBBLE_IMAGES
+            )
+        );
+
+        sharky.bubbleSpawned = true;
+    },
+
+    updateBubbles(ctx) {
+        BUBBLES.forEach(bubble => {
+            if (bubble.markedForDeletion) return;
+
+            bubble.draw(ctx);
+
+            ENEMIES.forEach(enemy => {
+                if (bubble.markedForDeletion) return;
+                if (enemy.isDead) return;
+
+                if (!bubble.isColliding(enemy)) return;
+
+                if (enemy.enemyType === 'jellyfish') {
+                    enemy.die();
+                }
+
+                bubble.markedForDeletion = true;
+            });
+        });
+
+        for (let i = BUBBLES.length - 1; i >= 0; i--) {
+            if (BUBBLES[i].markedForDeletion) {
+                BUBBLES.splice(i, 1);
+            }
+        }
     },
 
     restart() {
@@ -187,8 +283,9 @@ function loadWorld(ctx, canvas) {
     Background(ctx);
     Entities(ctx);
     Collectibles(ctx);
-    Enemies(ctx);
 
+    Enemies(ctx, gameState.getSharky());
+    gameState.updateBubbles(ctx);
 
     if (DEBUG_HITBOXES) {
         drawWorldHitboxes(ctx);
@@ -216,32 +313,13 @@ function loadWorld(ctx, canvas) {
  * @param {CanvasRenderingContext2D} ctx - The 2D rendering context of the canvas.
  * @returns {void}
  */
-// function drawHud(ctx) {
-//     let sharky = gameState.getSharky();
-//     let boss = ENEMIES.find(enemy => enemy.health !== undefined);
+function drawHud(ctx) {
+    let boss = ENEMIES.find(enemy => enemy.health !== undefined);
 
-//     drawBar(ctx, 40, 38, 420, 34, sharky.health, 100, 'Health');
-//     drawBar(ctx, 40, 88, 260, 28, sharky.poison, 5, 'Poison');
-
-//     ctx.font = '34px Arial';
-//     ctx.fillStyle = '#ffffff';
-//     ctx.fillText(`Coins: ${sharky.coins}/${COINS.length}`, 40, 165);
-
-//     if (boss && !boss.isDead && camera_x > 14500) {
-//         drawBar(ctx, 1240, 38, 620, 34, boss.health, 100, 'Boss');
-//     };
-
-//     if (gameState.message) {
-//         ctx.save();
-//         ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
-//         ctx.fillRect(0, 0, 1920, 1080);
-//         ctx.fillStyle = '#ffffff';
-//         ctx.textAlign = 'center';
-//         ctx.font = '72px Arial';
-//         ctx.fillText(gameState.message, 960, 520);
-//         ctx.restore();
-//     };
-// }
+    if (boss && !boss.isDead && camera_x > 14500) {
+        drawBar(ctx, 1240, 38, 620, 34, boss.health, 100, 'Boss');
+    };
+}
 
 /**
  * Draws a simple progress bar with a label.
@@ -258,22 +336,22 @@ function loadWorld(ctx, canvas) {
  * @param {string} label - The text label displayed above the bar.
  * @returns {void}
  */
-function drawBar(ctx, x, y, w, h, value, maxValue, label) {
-    let percent = Math.max(0, Math.min(value / maxValue, 1));
+// function drawBar(ctx, x, y, w, h, value, maxValue, label) {
+//     let percent = Math.max(0, Math.min(value / maxValue, 1));
 
-    ctx.save();
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
-    ctx.fillRect(x, y, w, h);
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(x, y, w * percent, h);
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 3;
-    ctx.strokeRect(x, y, w, h);
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '22px Arial';
-    ctx.fillText(`${label}: ${value}`, x, y - 8);
-    ctx.restore();
-}
+//     ctx.save();
+//     ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+//     ctx.fillRect(x, y, w, h);
+//     ctx.fillStyle = '#ffffff';
+//     ctx.fillRect(x, y, w * percent, h);
+//     ctx.strokeStyle = '#ffffff';
+//     ctx.lineWidth = 3;
+//     ctx.strokeRect(x, y, w, h);
+//     ctx.fillStyle = '#ffffff';
+//     ctx.font = '22px Arial';
+//     ctx.fillText(`${label}: ${value}`, x, y - 8);
+//     ctx.restore();
+// }
 
 /**
  * Draws debug hitboxes for all world objects.
