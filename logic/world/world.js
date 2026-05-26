@@ -6,47 +6,20 @@ import Sharky from "./characters/sharky.js";
 import Bubble from "../../lib/classes/entities/bubble.class.js";
 import Keyboard from "../../lib/classes/keyboard/keyboard.class.js";
 import HUD from "./hud/hud.js";
+
 import { SHARKY } from "../../lib/configs/characters/sharky.configs.js";
 import { ENEMIES } from "../../lib/configs/characters/enemy.configs.js";
 import { ENTITIES } from "../../lib/configs/entities/entity.configs.js";
 import { COINS, POISONS } from "../../lib/configs/entities/collectibles.configs.js";
-import { BUBBLES, BUBBLE_IMAGES } from "../../lib/configs/entities/bubble.configs.js";
+import { BUBBLES, BUBBLE_IMAGES, POISON_BUBBLE_IMAGES } from "../../lib/configs/entities/bubble.configs.js";
 
-/**
- * Stores the current horizontal camera offset of the game world.
- * Used to move the visible world relative to Sharky's position.
- *
- * @type {number}
- */
 let camera_x = 0;
-
-/**
- * Enables or disables visual debug hitboxes for entities, enemies,
- * collectibles and Sharky.
- *
- * @type {boolean}
- */
 let DEBUG_HITBOXES = true;
 
-/**
- * Stores and controls the current game state.
- * Handles collisions, collectibles, attacks, win/lose checks and restart logic.
- *
- * @type {{
- *   status: string,
- *   message: string,
- *   getSharky: Function,
- *   isBlocked: Function,
- *   checkCollisions: Function,
- *   checkCollectibles: Function,
- *   checkAttacks: Function,
- *   checkStatus: Function,
- *   restart: Function
- * }}
- */
 const gameState = {
     status: 'running',
     message: '',
+    endEventDispatched: false,
 
     getSharky() {
         return SHARKY[0];
@@ -62,16 +35,29 @@ const gameState = {
         ENEMIES.forEach(enemy => {
             if (enemy.isDead) return;
 
-            if (sharky.isColliding(enemy, camera_x)) {
-                if (enemy.enemyType === 'jellyfish' && sharky.attackType === 'fin' && sharky.isAttacking()) {
-                    return;
+            if (!sharky.isColliding(enemy, camera_x)) return;
+
+            if (enemy.health !== undefined) {
+                if (enemy.bossState !== 'fighting') return;
+
+                if (
+                    enemy.canApplyAttackHit &&
+                    enemy.canApplyAttackHit()
+                ) {
+                    sharky.hit(enemy.damage || 25, enemy);
                 }
 
-                sharky.hit(enemy.damage || 15, enemy);
+                return;
+            }
 
-                if (enemy.enemyType === 'jellyfish') {
-                    enemy.startSuperDangerous();
-                }
+            if (enemy.enemyType === 'jellyfish' && sharky.attackType === 'fin' && sharky.isAttacking()) {
+                return;
+            }
+
+            sharky.hit(enemy.damage || 15, enemy);
+
+            if (enemy.enemyType === 'jellyfish') {
+                enemy.startSuperDangerous();
             }
         });
     },
@@ -117,10 +103,14 @@ const gameState = {
             if (!isHit) return;
 
             if (enemy.health !== undefined) {
-                if (sharky.attackType === 'bubble' && sharky.poison > 0) {
-                    enemy.hit();
-                    sharky.poison--;
+                if (sharky.attackType === 'fin') {
+                    if (!sharky.canApplyFinHit()) return;
+                    if (enemy.lastHitAttackId === sharky.currentAttackId) return;
+
+                    enemy.lastHitAttackId = sharky.currentAttackId;
+                    enemy.hit(2);
                 }
+
                 return;
             }
 
@@ -151,24 +141,36 @@ const gameState = {
     },
 
     checkStatus() {
-        let sharky = this.getSharky();
-        let boss = ENEMIES.find(enemy => enemy.health !== undefined);
+    let sharky = this.getSharky();
+    let boss = ENEMIES.find(enemy => enemy.health !== undefined);
 
-        if (sharky.isDead) {
-            this.status = 'gameOver';
-            this.message = 'Game Over - R zum Neustarten';
-            return;
+    if (sharky.isDead) {
+        this.status = 'gameOver';
+        this.message = 'Game Over - R zum Neustarten';
+
+        if (!this.endEventDispatched) {
+            this.endEventDispatched = true;
+            window.dispatchEvent(new CustomEvent('sharkyGameOver'));
         }
 
-        if (boss && boss.isDead) {
-            this.status = 'won';
-            this.message = 'Gewonnen - Boss besiegt';
-            return;
+        return;
+    }
+
+    if (boss && boss.isDead) {
+        this.status = 'won';
+        this.message = 'Gewonnen - Boss besiegt';
+
+        if (!this.endEventDispatched) {
+            this.endEventDispatched = true;
+            window.dispatchEvent(new CustomEvent('sharkyGameWon'));
         }
 
-        this.status = 'running';
-        this.message = '';
-    },
+        return;
+    }
+
+    this.status = 'running';
+    this.message = '';
+},
 
     spawnBubble() {
         let sharky = this.getSharky();
@@ -187,6 +189,11 @@ const gameState = {
 
         let y = sharkyBox.y + sharkyBox.h / 2 - bubbleH / 2;
 
+        let isPoisonBubble = sharky.poison >= 5;
+        let bubbleImages = isPoisonBubble ? POISON_BUBBLE_IMAGES : BUBBLE_IMAGES;
+        let bubbleDamage = isPoisonBubble ? 25 : 10;
+        let bubbleType = isPoisonBubble ? 'poison' : 'normal';
+
         BUBBLES.push(
             new Bubble(
                 x,
@@ -195,9 +202,15 @@ const gameState = {
                 bubbleH,
                 12,
                 direction,
-                BUBBLE_IMAGES
+                bubbleImages,
+                bubbleDamage,
+                bubbleType
             )
         );
+
+        if (isPoisonBubble) {
+            sharky.poison = 0;
+        }
 
         sharky.bubbleSpawned = true;
     },
@@ -213,6 +226,12 @@ const gameState = {
                 if (enemy.isDead) return;
 
                 if (!bubble.isColliding(enemy)) return;
+
+                if (enemy.health !== undefined) {
+                    enemy.hit(bubble.damage || 10);
+                    bubble.markedForDeletion = true;
+                    return;
+                }
 
                 if (enemy.enemyType === 'jellyfish') {
                     enemy.die();
@@ -234,12 +253,6 @@ const gameState = {
     }
 }
 
-/**
- * Initializes the canvas, applies device pixel ratio scaling
- * and starts the main game loop.
- *
- * @returns {void}
- */
 export default function loadCanvas() {
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
@@ -253,22 +266,13 @@ export default function loadCanvas() {
     loadWorld(ctx, canvas);
 }
 
-/**
- * Main game loop.
- *
- * Clears the canvas, updates game logic, renders the world,
- * renders Sharky, draws the HUD and requests the next animation frame.
- *
- * @param {CanvasRenderingContext2D} ctx - The 2D rendering context of the canvas.
- * @param {HTMLCanvasElement} canvas - The game canvas element.
- * @returns {void}
- */
 function loadWorld(ctx, canvas) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    if (Keyboard.RESTART && gameState.status === 'gameOver') {
-        gameState.restart();
-    }
+    if (Keyboard.RESTART) {
+    gameState.restart();
+    return;
+}
 
     if (gameState.status === 'running') {
         gameState.checkCollectibles();
@@ -283,8 +287,7 @@ function loadWorld(ctx, canvas) {
     Background(ctx);
     Entities(ctx);
     Collectibles(ctx);
-
-    Enemies(ctx, gameState.getSharky());
+    Enemies(ctx, gameState.getSharky(), camera_x);
     gameState.updateBubbles(ctx);
 
     if (DEBUG_HITBOXES) {
@@ -300,68 +303,43 @@ function loadWorld(ctx, canvas) {
     }
 
     HUD(ctx);
+    drawBossHud(ctx);
 
-    requestAnimationFrame(() => loadWorld(ctx, canvas))
+    requestAnimationFrame(() => loadWorld(ctx, canvas));
 }
 
-/**
- * Draws the game HUD.
- *
- * Displays Sharky's health, poison amount, collected coins,
- * boss health and game status messages.
- *
- * @param {CanvasRenderingContext2D} ctx - The 2D rendering context of the canvas.
- * @returns {void}
- */
-function drawHud(ctx) {
+function drawBossHud(ctx) {
     let boss = ENEMIES.find(enemy => enemy.health !== undefined);
 
-    if (boss && !boss.isDead && camera_x > 14500) {
-        drawBar(ctx, 1240, 38, 620, 34, boss.health, 100, 'Boss');
-    };
+    if (!boss) return;
+    if (boss.isDead) return;
+    if (boss.bossState === 'sleeping') return;
+
+    drawBossBar(ctx, 1240, 38, 620, 34, boss.health, boss.maxHealth, 'Boss');
 }
 
-/**
- * Draws a simple progress bar with a label.
- *
- * Used for health, poison and boss health.
- *
- * @param {CanvasRenderingContext2D} ctx - The 2D rendering context of the canvas.
- * @param {number} x - The x position of the bar.
- * @param {number} y - The y position of the bar.
- * @param {number} w - The width of the bar.
- * @param {number} h - The height of the bar.
- * @param {number} value - The current value.
- * @param {number} maxValue - The maximum possible value.
- * @param {string} label - The text label displayed above the bar.
- * @returns {void}
- */
-// function drawBar(ctx, x, y, w, h, value, maxValue, label) {
-//     let percent = Math.max(0, Math.min(value / maxValue, 1));
+function drawBossBar(ctx, x, y, w, h, value, maxValue, label) {
+    let percent = Math.max(0, Math.min(value / maxValue, 1));
 
-//     ctx.save();
-//     ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
-//     ctx.fillRect(x, y, w, h);
-//     ctx.fillStyle = '#ffffff';
-//     ctx.fillRect(x, y, w * percent, h);
-//     ctx.strokeStyle = '#ffffff';
-//     ctx.lineWidth = 3;
-//     ctx.strokeRect(x, y, w, h);
-//     ctx.fillStyle = '#ffffff';
-//     ctx.font = '22px Arial';
-//     ctx.fillText(`${label}: ${value}`, x, y - 8);
-//     ctx.restore();
-// }
+    ctx.save();
 
-/**
- * Draws debug hitboxes for all world objects.
- *
- * Includes static entities, enemies, coins and poison bottles.
- * Only visible when DEBUG_HITBOXES is enabled.
- *
- * @param {CanvasRenderingContext2D} ctx - The 2D rendering context of the canvas.
- * @returns {void}
- */
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+    ctx.fillRect(x, y, w, h);
+
+    ctx.fillStyle = 'rgba(160, 0, 0, 0.95)';
+    ctx.fillRect(x, y, w * percent, h);
+
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(x, y, w, h);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '24px Arial';
+    ctx.fillText(`${label}: ${value}`, x, y - 10);
+
+    ctx.restore();
+}
+
 function drawWorldHitboxes(ctx) {
     ENTITIES.forEach(entity => {
         drawDebugBox(ctx, entity, '#ff0000', 'Entity');
@@ -388,15 +366,6 @@ function drawWorldHitboxes(ctx) {
     });
 }
 
-/**
- * Draws Sharky's debug hitbox.
- *
- * Uses Sharky's own getHitbox method if available.
- * Otherwise falls back to Sharky's raw object dimensions.
- *
- * @param {CanvasRenderingContext2D} ctx - The 2D rendering context of the canvas.
- * @returns {void}
- */
 function drawSharkyHitbox(ctx) {
     let sharky = gameState.getSharky();
 
@@ -408,24 +377,6 @@ function drawSharkyHitbox(ctx) {
     drawDebugBox(ctx, sharky, '#00ffff', 'Sharky');
 }
 
-/**
- * Draws a rectangular debug box with an optional label.
- *
- * Accepts objects using either w/h or width/height as size properties.
- * If required position or size values are missing, nothing is drawn.
- *
- * @param {CanvasRenderingContext2D} ctx - The 2D rendering context of the canvas.
- * @param {Object} debugBox - The object containing x, y, width/height or w/h values.
- * @param {number} debugBox.x - The x position of the box.
- * @param {number} debugBox.y - The y position of the box.
- * @param {number} [debugBox.w] - The width of the box.
- * @param {number} [box.h] - The height of the box.
- * @param {number} [box.width] - Alternative width property.
- * @param {number} [box.height] - Alternative height property.
- * @param {string} color - The stroke and text color of the debug box.
- * @param {string} [label=''] - Optional label displayed above the box.
- * @returns {void}
- */
 function drawDebugBox(ctx, debugBox, color, label = '') {
     if (!debugBox) return;
 

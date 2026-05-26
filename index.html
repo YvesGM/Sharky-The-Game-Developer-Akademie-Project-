@@ -1,29 +1,120 @@
 <!DOCTYPE html>
 <html lang="de">
 
+<!DOCTYPE html>
+<html lang="de">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+    
     <link rel="stylesheet" href="./assets/css/style.css">
-
+    
     <title>Sharky - My Portfolio Game-Project</title>
 </head>
 
 <body>
     <header></header>
+    
     <main>
         <div class="main_content_area">
             <section class="game_section">
                 <h1>Sharky</h1>
-                <canvas id="gameCanvas" class="game_canvas">
-                </canvas>
+                
+                <div class="game_layout">
+                    <aside class="game_instructions">
+                        <h2>Controls</h2>
+                        
+                        <div class="instruction_row">
+                            <div class="arrow_keys">
+                                <img id="keyArrowUpImage" alt="Arrow Up">
+                                <div>
+                                    <img id="keyArrowLeftImage" alt="Arrow Left">
+                                    <img id="keyArrowDownImage" alt="Arrow Down">
+                                    <img id="keyArrowRightImage" alt="Arrow Right">
+                                </div>
+                            </div>
+                            <span>Move</span>
+                        </div>
+                        
+                        <div class="instruction_row">
+                            <img id="keyDImage" alt="D Key">
+                            <span>Fin Attack</span>
+                        </div>
+                        
+                        <div class="instruction_row">
+                            <img id="keySpaceImage" alt="Space Key">
+                            <span>Bubble Attack</span>
+                        </div>
+                        
+                        <div class="instruction_row">
+                            <img id="keyRImage" alt="R Key">
+                            <span>Restart Game</span>
+                        </div>
+                        
+                        <div class="menu_buttons">
+                            <button id="fullscreenGameButton" class="image_button">
+                                <img id="fullscreenButtonImage" alt="Fullscreen">
+                            </button>
+                            
+                            <button id="restartGameButton" class="image_button">
+                                <img id="restartButtonImage" alt="Restart">
+                            </button>
+                        </div>
+                    </aside>
+                    
+                    <div class="game_wrapper">
+                        <canvas id="gameCanvas" class="game_canvas"></canvas>
+                        
+                        <div id="startScreen" class="game_overlay">
+                            <img id="startScreenImage" class="screen_image" alt="Start Screen">
+                            
+                            <button id="startGameButton" class="image_button start_button">
+                                <img id="startButtonImage" alt="Start Game">
+                            </button>
+                        </div>
+                        
+                        <div id="gameOverScreen" class="game_overlay d_none">
+                            <img id="gameOverScreenImage" class="screen_image" alt="Game Over">
+                            
+                            <button id="gameOverRestartButton" class="image_button restart_overlay_button">
+                                <img id="gameOverRestartButtonImage" alt="Restart Game">
+                            </button>
+                        </div>
+                        
+                        <div id="winScreen" class="game_overlay d_none">
+                            <img id="winScreenImage" class="screen_image" alt="You Win">
+                            
+                            <button id="winRestartButton" class="image_button restart_overlay_button">
+                                <img id="winRestartButtonImage" alt="Restart Game">
+                            </button>
+                        </div>
+                        
+                        <div class="mobile_controls">
+                            <div class="mobile_dpad">
+                                <button data-key="UP">▲</button>
+                                
+                                <div>
+                                    <button data-key="LEFT">◀</button>
+                                    <button data-key="DOWN">▼</button>
+                                    <button data-key="RIGHT">▶</button>
+                                </div>
+                            </div>
+                            
+                            <div class="mobile_actions">
+                                <button data-key="SPACE">Bubble</button>
+                                <button data-key="D">Attack</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </section>
         </div>
-
     </main>
+    
     <footer></footer>
+    
+    <script type="module" src="./logic/game.js"></script>
 </body>
 
-<script type="module" src="./logic/game.js"></script>
 </html>
