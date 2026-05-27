@@ -1,24 +1,21 @@
-import { UI_IMAGES } from "../../storage/ui.storage.js";
+import { UI_IMAGES } from "../../../lib/storage/hud/game-menu.storage.js";
 
 export function initGameUI({ onStart, onRestart, onFullscreen }) {
-    setImage("startScreenImage", UI_IMAGES.START_SCREEN);
     setImage("startButtonImage", UI_IMAGES.START_BUTTON);
-    setImage("gameOverScreenImage", UI_IMAGES.GAME_OVER_SCREEN);
+    setImage("gameOverText", UI_IMAGES.GAME_OVER_TEXT);
     setImage("winScreenImage", UI_IMAGES.WIN_SCREEN);
-
+    setImage("startScreenImage", UI_IMAGES.START_SCREEN);
+    
     setImage("restartButtonImage", UI_IMAGES.RESTART_BUTTON);
     setImage("fullscreenButtonImage", UI_IMAGES.FULLSCREEN_BUTTON);
 
     setImage("gameOverRestartButtonImage", UI_IMAGES.RESTART_BUTTON);
     setImage("winRestartButtonImage", UI_IMAGES.RESTART_BUTTON);
 
-    setImage("keyArrowUpImage", UI_IMAGES.KEY_ARROW_UP);
-    setImage("keyArrowLeftImage", UI_IMAGES.KEY_ARROW_LEFT);
-    setImage("keyArrowDownImage", UI_IMAGES.KEY_ARROW_DOWN);
-    setImage("keyArrowRightImage", UI_IMAGES.KEY_ARROW_RIGHT);
+    setImage("arrowKeys", UI_IMAGES.ARROW_KEYS);
     setImage("keyDImage", UI_IMAGES.KEY_D);
     setImage("keySpaceImage", UI_IMAGES.KEY_SPACE);
-    setImage("keyRImage", UI_IMAGES.KEY_R);
+    // setImage("keyRImage", UI_IMAGES.KEY_R);
 
     document.getElementById("startGameButton")?.addEventListener("click", onStart);
     document.getElementById("restartGameButton")?.addEventListener("click", onRestart);

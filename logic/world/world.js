@@ -141,36 +141,36 @@ const gameState = {
     },
 
     checkStatus() {
-    let sharky = this.getSharky();
-    let boss = ENEMIES.find(enemy => enemy.health !== undefined);
+        let sharky = this.getSharky();
+        let boss = ENEMIES.find(enemy => enemy.health !== undefined);
 
-    if (sharky.isDead) {
-        this.status = 'gameOver';
-        this.message = 'Game Over - R zum Neustarten';
+        if (sharky.isDead) {
+            this.status = 'gameOver';
+            this.message = 'Game Over - R zum Neustarten';
 
-        if (!this.endEventDispatched) {
-            this.endEventDispatched = true;
-            window.dispatchEvent(new CustomEvent('sharkyGameOver'));
+            if (!this.endEventDispatched) {
+                this.endEventDispatched = true;
+                window.dispatchEvent(new CustomEvent('sharkyGameOver'));
+            }
+
+            return;
         }
 
-        return;
-    }
+        if (boss && boss.isDead) {
+            this.status = 'won';
+            this.message = 'Gewonnen - Boss besiegt';
 
-    if (boss && boss.isDead) {
-        this.status = 'won';
-        this.message = 'Gewonnen - Boss besiegt';
+            if (!this.endEventDispatched) {
+                this.endEventDispatched = true;
+                window.dispatchEvent(new CustomEvent('sharkyGameWon'));
+            }
 
-        if (!this.endEventDispatched) {
-            this.endEventDispatched = true;
-            window.dispatchEvent(new CustomEvent('sharkyGameWon'));
+            return;
         }
 
-        return;
-    }
-
-    this.status = 'running';
-    this.message = '';
-},
+        this.status = 'running';
+        this.message = '';
+    },
 
     spawnBubble() {
         let sharky = this.getSharky();
@@ -270,9 +270,9 @@ function loadWorld(ctx, canvas) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     if (Keyboard.RESTART) {
-    gameState.restart();
-    return;
-}
+        gameState.restart();
+        return;
+    }
 
     if (gameState.status === 'running') {
         gameState.checkCollectibles();

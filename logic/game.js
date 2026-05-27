@@ -1,6 +1,6 @@
 import Keyboard from "../lib/classes/keyboard/keyboard.class.js";
 import loadCanvas from "./world/world.js";
-import { initGameUI, hideStartScreen } from "./ui/game-ui.js";
+import { initGameUI, hideStartScreen } from "./world/hud/game-ui.js";
 
 let gameStarted = false;
 
