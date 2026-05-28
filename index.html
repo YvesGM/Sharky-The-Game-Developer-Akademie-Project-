@@ -22,14 +22,15 @@
                 <canvas id="gameCanvas" class="game_canvas"></canvas>
 
                 <div id="startScreen" class="game_overlay">
-                    <img id="startScreenImage" class="screen_image" alt="Start Screen">
+                    <img id="startScreenImage" class="start_screen" alt="Start Screen">
                     <button id="startGameButton" class="image_button start_button">
                         <img id="startButtonImage" alt="Start Game">
                     </button>
                 </div>
 
                 <div id="gameOverScreen" class="game_overlay d_none">
-                    <img id="gameOverText" class="screen_image" alt="Game Over">
+                    <img id="gameOverText" class="game_over_screen" alt="Game Over">
+                    <div id="gameOverScore" class="score_box"></div>
 
                     <button id="gameOverRestartButton" class="image_button restart_overlay_button">
                         <img id="gameOverRestartButtonImage" alt="Restart Game">
@@ -37,7 +38,8 @@
                 </div>
 
                 <div id="winScreen" class="game_overlay d_none">
-                    <img id="winScreenImage" class="screen_image" alt="You Win">
+                    <img id="winScreenImage" class="win_screen" alt="You Win">
+                    <div id="winScore" class="score_box"></div>
 
                     <button id="winRestartButton" class="image_button restart_overlay_button">
                         <img id="winRestartButtonImage" alt="Restart Game">

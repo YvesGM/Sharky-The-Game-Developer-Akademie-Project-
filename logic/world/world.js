@@ -14,12 +14,14 @@ import { COINS, POISONS } from "../../lib/configs/entities/collectibles.configs.
 import { BUBBLES, BUBBLE_IMAGES, POISON_BUBBLE_IMAGES } from "../../lib/configs/entities/bubble.configs.js";
 
 let camera_x = 0;
-let DEBUG_HITBOXES = true;
+let DEBUG_HITBOXES = false;
 
 const gameState = {
     status: 'running',
     message: '',
     endEventDispatched: false,
+    startedAt: Date.now(),
+    endedAt: null,
 
     getSharky() {
         return SHARKY[0];
@@ -148,10 +150,7 @@ const gameState = {
             this.status = 'gameOver';
             this.message = 'Game Over - R zum Neustarten';
 
-            if (!this.endEventDispatched) {
-                this.endEventDispatched = true;
-                window.dispatchEvent(new CustomEvent('sharkyGameOver'));
-            }
+            this.finishGame('sharkyGameOver');
 
             return;
         }
@@ -160,10 +159,7 @@ const gameState = {
             this.status = 'won';
             this.message = 'Gewonnen - Boss besiegt';
 
-            if (!this.endEventDispatched) {
-                this.endEventDispatched = true;
-                window.dispatchEvent(new CustomEvent('sharkyGameWon'));
-            }
+            this.finishGame('sharkyGameWon');
 
             return;
         }
@@ -189,10 +185,10 @@ const gameState = {
 
         let y = sharkyBox.y + sharkyBox.h / 2 - bubbleH / 2;
 
-        let isPoisonBubble = sharky.poison >= 5;
-let bubbleImages = isPoisonBubble ? POISON_BUBBLE_IMAGES : BUBBLE_IMAGES;
-let bubbleDamage = isPoisonBubble ? 35 : 10;
-let bubbleType = isPoisonBubble ? 'poison' : 'normal';
+        let isPoisonBubble = sharky.isPoisonBubbleAttack;
+        let bubbleImages = isPoisonBubble ? POISON_BUBBLE_IMAGES : BUBBLE_IMAGES;
+        let bubbleDamage = isPoisonBubble ? 35 : 10;
+        let bubbleType = isPoisonBubble ? 'poison' : 'normal';
 
         BUBBLES.push(
             new Bubble(
@@ -242,6 +238,36 @@ let bubbleType = isPoisonBubble ? 'poison' : 'normal';
                 BUBBLES.splice(i, 1);
             }
         }
+    },
+
+    finishGame(eventName) {
+        if (this.endEventDispatched) return;
+
+        this.endedAt = Date.now();
+        this.endEventDispatched = true;
+
+        window.dispatchEvent(new CustomEvent(eventName, {
+            detail: this.getScore()
+        }));
+    },
+
+    getScore() {
+        let sharky = this.getSharky();
+        let endTime = this.endedAt || Date.now();
+        let durationInSeconds = Math.floor((endTime - this.startedAt) / 1000);
+
+        return {
+            coins: sharky.coins,
+            poison: sharky.totalPoisonCollected || 0,
+            time: this.formatTime(durationInSeconds)
+        };
+    },
+
+    formatTime(seconds) {
+        let minutes = Math.floor(seconds / 60);
+        let restSeconds = seconds % 60;
+
+        return `${minutes}:${restSeconds.toString().padStart(2, '0')}`;
     },
 
     restart() {
@@ -309,7 +335,7 @@ function drawBossHud(ctx) {
 
     if (!boss) return;
     if (boss.isDead) return;
-    if (boss.bossState === 'sleeping') return;
+    if (boss.bossState !== 'fighting') return;
 
     drawBossBar(ctx, 1240, 38, 620, 34, boss.health, boss.maxHealth, 'Boss');
 }
