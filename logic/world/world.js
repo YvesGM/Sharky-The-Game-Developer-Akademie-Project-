@@ -108,7 +108,7 @@ const gameState = {
                     if (enemy.lastHitAttackId === sharky.currentAttackId) return;
 
                     enemy.lastHitAttackId = sharky.currentAttackId;
-                    enemy.hit(2);
+                    enemy.hit(12);
                 }
 
                 return;
@@ -190,9 +190,9 @@ const gameState = {
         let y = sharkyBox.y + sharkyBox.h / 2 - bubbleH / 2;
 
         let isPoisonBubble = sharky.poison >= 5;
-        let bubbleImages = isPoisonBubble ? POISON_BUBBLE_IMAGES : BUBBLE_IMAGES;
-        let bubbleDamage = isPoisonBubble ? 25 : 10;
-        let bubbleType = isPoisonBubble ? 'poison' : 'normal';
+let bubbleImages = isPoisonBubble ? POISON_BUBBLE_IMAGES : BUBBLE_IMAGES;
+let bubbleDamage = isPoisonBubble ? 35 : 10;
+let bubbleType = isPoisonBubble ? 'poison' : 'normal';
 
         BUBBLES.push(
             new Bubble(
@@ -207,10 +207,6 @@ const gameState = {
                 bubbleType
             )
         );
-
-        if (isPoisonBubble) {
-            sharky.poison = 0;
-        }
 
         sharky.bubbleSpawned = true;
     },
