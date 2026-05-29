@@ -1,0 +1,200 @@
+html,
+body {
+    font-family: "Luckiest Guy", Arial, sans-serif;
+
+    width: 100%;
+    min-height: 100vh;
+}
+
+html {
+    overflow-x: hidden;
+}
+
+body {
+    width: 100%;
+    min-height: 100vh;
+
+    color: #ffffff;
+    background:
+        radial-gradient(circle at 18% 12%, rgba(144, 255, 250, 0.65), transparent 24rem),
+        radial-gradient(circle at 82% 18%, rgba(89, 168, 255, 0.42), transparent 28rem),
+        radial-gradient(circle at 50% 100%, rgba(28, 46, 143, 0.55), transparent 34rem),
+        linear-gradient(180deg, #e8fbff 0%, #9be6ff 34%, #2f92d4 68%, #0b3472 100%);
+
+    overflow-x: hidden;
+}
+
+main {
+    display: flex;
+    justify-content: center;
+
+    width: 100%;
+    min-height: 100vh;
+}
+
+.game_section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    position: relative;
+    isolation: isolate;
+
+    width: 100%;
+    min-height: 100vh;
+    padding: 24px;
+    gap: 14px;
+
+    overflow: hidden;
+}
+
+.game_section::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+
+    background:
+        radial-gradient(circle at 10% 82%, rgba(255, 255, 255, 0.55) 0 0.38rem, transparent 0.44rem),
+        radial-gradient(circle at 17% 68%, rgba(255, 255, 255, 0.38) 0 0.24rem, transparent 0.3rem),
+        radial-gradient(circle at 26% 86%, rgba(255, 255, 255, 0.42) 0 0.3rem, transparent 0.36rem),
+        radial-gradient(circle at 82% 72%, rgba(255, 255, 255, 0.48) 0 0.44rem, transparent 0.52rem),
+        radial-gradient(circle at 74% 53%, rgba(255, 255, 255, 0.28) 0 0.28rem, transparent 0.35rem),
+        radial-gradient(circle at 91% 32%, rgba(255, 255, 255, 0.34) 0 0.38rem, transparent 0.46rem);
+
+    opacity: 0.95;
+    pointer-events: none;
+}
+
+.game_section::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+
+    background:
+        linear-gradient(115deg, transparent 0%, rgba(255, 255, 255, 0.18) 18%, transparent 34%),
+        linear-gradient(105deg, transparent 8%, rgba(255, 255, 255, 0.12) 28%, transparent 48%),
+        radial-gradient(ellipse at 50% 18%, rgba(255, 255, 255, 0.34), transparent 38rem);
+
+    mix-blend-mode: screen;
+    pointer-events: none;
+}
+
+.game_section h1 {
+    font-size: clamp(28px, 3vw, 46px);
+    font-weight: 400;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+
+    text-shadow:
+        0 2px 0 #ffffff,
+        0 5px 0 rgba(0, 0, 0, 0.22),
+        0 12px 24px rgba(0, 0, 0, 0.2);
+
+    margin-top: 2px;
+
+    color: #06172c;
+}
+
+.game_section h1,
+.game_wrapper,
+.game_layout {
+    position: relative;
+    z-index: 1;
+}
+
+.game_wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    position: relative;
+    aspect-ratio: 16 / 9;
+
+    width: min(80vw, 1280px);
+
+    background:
+        linear-gradient(180deg, rgba(7, 22, 38, 0.96), rgba(0, 0, 0, 0.98));
+    box-shadow:
+        0 22px 48px rgba(5, 23, 52, 0.38),
+        0 0 0 8px rgba(255, 255, 255, 0.13),
+        inset 0 0 24px rgba(255, 255, 255, 0.1);
+    border: 3px solid rgba(255, 255, 255, 0.72);
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.game_wrapper::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+
+    box-shadow:
+        inset 0 0 38px rgba(255, 255, 255, 0.18),
+        inset 0 -34px 70px rgba(0, 46, 115, 0.22);
+    border-radius: inherit;
+
+    pointer-events: none;
+}
+
+.game_canvas {
+    display: block;
+
+    width: 100%;
+    height: 100%;
+
+    background-color: black;
+}
+
+.game_layout {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 32px;
+
+    width: 100%;
+}
+
+@media (max-width: 900px) {
+
+    html,
+    body {
+        overflow: hidden;
+    }
+
+    main {
+        height: 100dvh;
+    }
+
+    .game_section {
+        padding: 0px;
+    }
+
+    .game_section h1 {
+        display: none;
+    }
+
+    .game_layout {
+        display: none;
+    }
+
+    .game_wrapper {
+        width: 100vw;
+        height: 100dvh;
+
+        background-color: black;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .game_canvas {
+        width: 100vw;
+        max-width: none;
+        height: 100dvh;
+
+        object-fit: contain;
+    }
+}

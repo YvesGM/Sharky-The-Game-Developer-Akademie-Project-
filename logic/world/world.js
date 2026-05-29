@@ -14,7 +14,7 @@ import { COINS, POISONS } from "../../lib/configs/entities/collectibles.configs.
 import { BUBBLES, BUBBLE_IMAGES, POISON_BUBBLE_IMAGES } from "../../lib/configs/entities/bubble.configs.js";
 
 let camera_x = 0;
-let DEBUG_HITBOXES = false;
+let DEBUG_HITBOXES = true;
 
 const gameState = {
     status: 'running',
@@ -356,7 +356,7 @@ function drawBossBar(ctx, x, y, w, h, value, maxValue, label) {
     ctx.strokeRect(x, y, w, h);
 
     ctx.fillStyle = '#ffffff';
-    ctx.font = '24px Arial';
+    ctx.font = '24px "Luckiest Guy"';
     ctx.fillText(`${label}: ${value}`, x, y - 10);
 
     ctx.restore();
@@ -422,7 +422,7 @@ function drawDebugBox(ctx, debugBox, color, label = '') {
     ctx.strokeRect(x, y, w, h);
 
     ctx.fillStyle = color;
-    ctx.font = '18px Arial';
+    ctx.font = '18px "Luckiest Guy"';
     ctx.fillText(label, x, y - 6);
     ctx.restore();
 }
