@@ -48,8 +48,8 @@ function updateScore(scoreId, score) {
 
     scoreElement.innerHTML = `
         <p>Coins: ${score.coins}</p>
-        <p>Giftflaschen: ${score.poison}</p>
-        <p>Zeit: ${score.time}</p>
+        <p>Poison Bottles: ${score.poison}</p>
+        <p>Time: ${score.time}</p>
     `;
 }
 

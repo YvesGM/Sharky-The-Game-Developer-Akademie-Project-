@@ -148,7 +148,7 @@ const gameState = {
 
         if (sharky.isDead) {
             this.status = 'gameOver';
-            this.message = 'Game Over - R zum Neustarten';
+            this.message = 'Game Over - Press R to Restart';
 
             this.finishGame('sharkyGameOver');
 
@@ -157,7 +157,7 @@ const gameState = {
 
         if (boss && boss.isDead) {
             this.status = 'won';
-            this.message = 'Gewonnen - Boss besiegt';
+            this.message = 'You Won - Boss Defeated';
 
             this.finishGame('sharkyGameWon');
 
