@@ -109,7 +109,7 @@ function setControlImages() {
  * @returns {void}
  */
 function initGameButtons(onStart, onRestart, onFullscreen) {
-    addClickEvent("startGameButton", onStart);
+    addClickEvent("startGameButton", onStart, true);
     addClickEvent("restartGameButton", onRestart);
     addClickEvent("fullscreenGameButton", onFullscreen);
     addClickEvent("gameOverRestartButton", onRestart);
@@ -133,10 +133,38 @@ function initGameEndEvents() {
  *
  * @param {string} id - The element id.
  * @param {Function} callback - The click callback.
+ * @param {boolean} disableAfterClick - Whether the element should be disabled after clicking.
  * @returns {void}
  */
-function addClickEvent(id, callback) {
-    document.getElementById(id)?.addEventListener("click", callback);
+function addClickEvent(id, callback, disableAfterClick = false) {
+    const button = document.getElementById(id);
+
+    if (!button) return;
+
+    button.addEventListener("click", event => {
+        handleButtonClick(event, callback, disableAfterClick);
+    });
+}
+
+/**
+ * Handles one UI button click.
+ *
+ * @param {MouseEvent} event - The click event.
+ * @param {Function} callback - The click callback.
+ * @param {boolean} disableAfterClick - Whether the button should be disabled after clicking.
+ * @returns {void}
+ */
+function handleButtonClick(event, callback, disableAfterClick) {
+    event.preventDefault();
+
+    const button = event.currentTarget;
+
+    if (disableAfterClick) {
+        button.disabled = true;
+    }
+
+    button.blur();
+    callback();
 }
 
 

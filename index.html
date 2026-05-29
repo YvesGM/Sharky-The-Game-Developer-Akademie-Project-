@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="./assets/css/layout/layout.css">
     <link rel="stylesheet" href="./assets/css/ui/overlay.css">
     <link rel="stylesheet" href="./assets/css/ui/instructions.css">
+    <link rel="stylesheet" href="./assets/css/ui/legals.css">
 
     <title>Sharky - My Portfolio Game-Project</title>
 </head>
@@ -25,16 +26,17 @@
 
                 <div id="startScreen" class="game_overlay">
                     <img id="startScreenImage" class="start_screen" alt="Start Screen">
-                    <button id="startGameButton" class="image_button start_button">
+                    <button type="button" id="startGameButton" class="image_button start_button">
                         <img id="startButtonImage" alt="Start Game">
                     </button>
+
                 </div>
 
                 <div id="gameOverScreen" class="game_overlay d_none">
                     <img id="gameOverText" class="game_over_screen" alt="Game Over">
                     <div id="gameOverScore" class="score_box"></div>
 
-                    <button id="gameOverRestartButton" class="image_button restart_overlay_button">
+                    <button type="button" id="gameOverRestartButton" class="image_button restart_overlay_button">
                         <img id="gameOverRestartButtonImage" alt="Restart Game">
                     </button>
                 </div>
@@ -43,27 +45,31 @@
                     <img id="winScreenImage" class="win_screen" alt="You Win">
                     <div id="winScore" class="score_box"></div>
 
-                    <button id="winRestartButton" class="image_button restart_overlay_button">
+                    <button type="button" id="winRestartButton" class="image_button restart_overlay_button">
                         <img id="winRestartButtonImage" alt="Restart Game">
                     </button>
                 </div>
+
+                <button id="legalButton" class="legal_button">Impressum & Credits</button>
+
             </div>
 
             <!-- Mobile Controls -->
             <div class="mobile_controls">
                 <div class="mobile_dpad">
-                    <button data-key="UP">▲</button>
+                    <button type="button" data-key="UP">▲</button>
 
                     <div>
-                        <button data-key="LEFT">◀</button>
-                        <button data-key="DOWN">▼</button>
-                        <button data-key="RIGHT">▶</button>
+                        <button type="button" data-key="LEFT">◀</button>
+                        <button type="button" data-key="DOWN">▼</button>
                     </div>
+
+                    <button type="button" data-key="RIGHT">▶</button>
                 </div>
 
                 <div class="mobile_actions">
-                    <button data-key="SPACE">Bubble</button>
-                    <button data-key="D">Attack</button>
+                    <button type="button" data-key="SPACE">Bubble</button>
+                    <button type="button" data-key="D">Attack</button>
                 </div>
             </div>
 
@@ -91,11 +97,11 @@
                         </div>
 
                         <div class="instruction_row">
-                            <button id="fullscreenGameButton" class="image_button">
+                            <button type="button" id="fullscreenGameButton" class="image_button">
                                 <img id="fullscreenButtonImage" alt="Fullscreen">
                             </button>
 
-                            <button id="restartGameButton" class="image_button">
+                            <button type="button" id="restartGameButton" class="image_button">
                                 <img id="restartButtonImage" alt="Restart">
                             </button>
                         </div>
@@ -105,6 +111,49 @@
 
             </div>
         </section>
+        <div id="legalModal" class="legal_modal d_none">
+            <div class="legal_modal_content">
+                <button id="legalCloseButton" class="legal_close_button">×</button>
+
+                <h2>Impressum</h2>
+
+                <p>
+                    Angaben gemäß § 5 DDG
+                </p>
+
+                <p>
+                    <strong>Yves Gildemeister</strong><br>
+                    Schulstraße 25<br>
+                    07987 Mohlsdorf-Teichwolframsdorf<br>
+                    Thrüringen, Deutschland
+                </p>
+
+                <p>
+                    Kontakt:<br>
+                    E-Mail: <a href="mailto:yvesgildemeister@gmail.com">yvesgildemeister@gmail.com</a>
+                </p>
+
+                <h2>Credits / Quellen</h2>
+
+                <h3>Sounds & Musik</h3>
+
+                <ul id="soundCreditsList" class="sound_credits_list">
+                    <li>Soundquellen werden geladen...</li>
+                </ul>
+
+                <h3>Grafiken</h3>
+
+                <ul>
+                    <li>
+                        Game Assets / Charaktere / Hintergründe: Developer Akademie / Sharky Assets
+                    </li>
+                </ul>
+
+                <p class="legal_note">
+                    Dieses Projekt wurde im Rahmen eines Ausbildungs-/Portfolio-Projekts erstellt.
+                </p>
+            </div>
+        </div>
     </main>
     <script type="module" src="./logic/game.js"></script>
 </body>

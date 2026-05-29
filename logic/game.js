@@ -1,6 +1,9 @@
 import Keyboard from "../lib/classes/keyboard/keyboard.class.js";
 import loadCanvas from "./world/world.js";
 import { initGameUI, hideStartScreen } from "./world/hud/game-ui.js";
+import { AUDIO_MANAGER } from "../lib/configs/audio/audio.configs.js";
+import { initLegalUI } from "./world/legals/legal-ui.js";
+import { initSoundCreditsUI } from "./world/legals/sound-credits-ui.js";
 
 let gameStarted = false;
 
@@ -23,6 +26,9 @@ const keyboardMap = {
  */
 function initializeSharky() {
     initMobileControls();
+    initLegalUI();
+    initSoundCreditsUI();
+
     initGameUI({
         onStart: startGame,
         onRestart: restartGame,
@@ -32,7 +38,7 @@ function initializeSharky() {
 
 
 /**
- * Starts the game once and loads the canvas.
+ * Starts the game once, hides the start screen, starts the audio and loads the canvas.
  *
  * @returns {void}
  */
@@ -40,8 +46,21 @@ function startGame() {
     if (gameStarted) return;
 
     gameStarted = true;
+
+    loadAudio();
     hideStartScreen();
     loadCanvas();
+}
+
+/**
+ * Stops menu music, plays the button click sound and starts the background music.
+ *
+ * @returns {void}
+ */
+function loadAudio() {
+    AUDIO_MANAGER.stopAllMusic();
+    AUDIO_MANAGER.play("buttonClick");
+    AUDIO_MANAGER.playMusic("background");
 }
 
 
@@ -51,6 +70,7 @@ function startGame() {
  * @returns {void}
  */
 function restartGame() {
+    AUDIO_MANAGER.play("buttonClick");
     window.location.reload();
 }
 

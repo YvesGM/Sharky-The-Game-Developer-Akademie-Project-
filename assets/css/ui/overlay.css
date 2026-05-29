@@ -38,8 +38,8 @@
     transform: translateX(-50%);
 }
 
-.start_button:active {
-    transform: translateX(-50%) scale(0.92) translateY(3px);
+.image_button.start_button:active {
+    transform: translateX(-50%) scale(0.96) translateY(1px);
 }
 
 .restart_overlay_button {
@@ -50,8 +50,15 @@
     transform: translateX(-50%);
 }
 
-.restart_overlay_button:active {
-    transform: translateX(-50%) scale(0.92) translateY(3px);
+.image_button.restart_overlay_button:active {
+    transform: translateX(-50%) scale(0.96) translateY(1px);
+}
+
+.start_button,
+.restart_overlay_button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .mobile_controls {
@@ -97,7 +104,8 @@
     margin: 0;
 }
 
-@media (max-width: 900px), (max-height: 570px) {
+@media (max-width: 900px),
+(max-height: 570px) {
 
     .game_overlay {
         z-index: 30;

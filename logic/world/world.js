@@ -12,9 +12,11 @@ import { ENEMIES } from "../../lib/configs/characters/enemy.configs.js";
 import { ENTITIES } from "../../lib/configs/entities/entity.configs.js";
 import { COINS, POISONS } from "../../lib/configs/entities/collectibles.configs.js";
 import { BUBBLES, BUBBLE_IMAGES, POISON_BUBBLE_IMAGES } from "../../lib/configs/entities/bubble.configs.js";
+import { AUDIO_MANAGER } from "../../lib/configs/audio/audio.configs.js";
 
 let camera_x = 0;
 let debugHitboxes = false;
+let bossIntroSoundPlayed = false;
 
 const gameState = {
     status: 'running',
@@ -221,10 +223,41 @@ function handleRestartKey() {
 function updateRunningGame() {
     if (gameState.status !== 'running') return;
 
+    checkBossIntroSound();
+
     gameState.checkCollectibles();
     gameState.checkCollisions();
     gameState.checkAttacks();
     gameState.checkStatus();
+}
+
+/**
+ * Plays the boss intro sound once when the boss intro starts.
+ *
+ * @returns {void}
+ */
+function checkBossIntroSound() {
+    const boss = ENEMIES.find(enemy => enemy.health !== undefined);
+
+    if (!boss) return;
+    if (bossIntroSoundPlayed) return;
+
+    if (isBossIntroActive(boss)) {
+        AUDIO_MANAGER.play("bossIntro");
+        bossIntroSoundPlayed = true;
+    }
+}
+
+/**
+ * Checks whether the boss intro is currently active.
+ *
+ * @param {Object} boss - The boss enemy object.
+ * @returns {boolean} Whether the boss intro is active.
+ */
+function isBossIntroActive(boss) {
+    return boss.bossState === 'intro' ||
+        boss.bossState === 'appearing' ||
+        boss.bossState === 'fighting';
 }
 
 
@@ -367,6 +400,7 @@ function handleBossCollision(sharky, enemy) {
 
     if (enemy.canApplyAttackHit && enemy.canApplyAttackHit()) {
         sharky.hit(enemy.damage || 25, enemy);
+        AUDIO_MANAGER.play("hurt");
     }
 }
 
@@ -381,8 +415,34 @@ function handleBossCollision(sharky, enemy) {
 function handleNormalEnemyCollision(sharky, enemy) {
     if (canSkipJellyfishFinCollision(sharky, enemy)) return;
 
+    const now = Date.now();
+
+    if (!sharky.canReceiveHit(now)) return;
+
+    if (enemy.enemyType === 'jellyfish') {
+        AUDIO_MANAGER.play("shock");
+        enemy.startSuperDangerous();
+        sharky.hit(enemy.damage || 15, enemy);
+        return;
+    }
+
+    AUDIO_MANAGER.play("hurt");
     sharky.hit(enemy.damage || 15, enemy);
-    startJellyfishDanger(enemy);
+}
+
+/**
+ * Plays the matching enemy collision sound.
+ *
+ * @param {Object} enemy - The enemy object.
+ * @returns {void}
+ */
+function playEnemyCollisionSound(enemy) {
+    if (enemy.enemyType === 'jellyfish') {
+        AUDIO_MANAGER.play("shock");
+        return;
+    }
+
+    AUDIO_MANAGER.play("hurt");
 }
 
 
@@ -440,6 +500,25 @@ function collectItem(sharky, item, collectMethod) {
 
     item.isCollected = true;
     sharky[collectMethod](item.value);
+
+    playCollectSound(collectMethod);
+}
+
+/**
+ * Plays the matching collectible sound.
+ *
+ * @param {string} collectMethod - The Sharky collect method.
+ * @returns {void}
+ */
+function playCollectSound(collectMethod) {
+    if (collectMethod === 'collectCoin') {
+        AUDIO_MANAGER.play("coin");
+        return;
+    }
+
+    if (collectMethod === 'collectPoison') {
+        AUDIO_MANAGER.play("bottle");
+    }
 }
 
 
@@ -546,6 +625,8 @@ function handleBossAttackHit(sharky, enemy) {
 
     enemy.lastHitAttackId = sharky.currentAttackId;
     enemy.hit(12);
+
+    AUDIO_MANAGER.play("bossHit");
 }
 
 
@@ -595,6 +676,9 @@ function handleJellyfishFinHit(sharky, enemy) {
 
     enemy.lastHitAttackId = sharky.currentAttackId;
     enemy.startSuperDangerous();
+
+    AUDIO_MANAGER.play("shock");
+
     sharky.scheduleShockDamage(enemy.damage || 15, enemy, 350);
 }
 
@@ -612,6 +696,8 @@ function handleFinEnemyKill(sharky, enemy) {
 
     enemy.lastHitAttackId = sharky.currentAttackId;
     enemy.die();
+
+    AUDIO_MANAGER.play("enemyDead");
 }
 
 
@@ -666,6 +752,10 @@ function handleSharkyDeath(sharky) {
     if (!sharky.isDead) return false;
 
     setFinishedStatus('gameOver', 'Game Over - Press R to Restart');
+
+    AUDIO_MANAGER.stopAllMusic();
+    AUDIO_MANAGER.play("gameOver");
+
     gameState.finishGame('sharkyGameOver');
     return true;
 }
@@ -681,6 +771,10 @@ function handleBossDeath(boss) {
     if (!boss || !boss.isDead) return false;
 
     setFinishedStatus('won', 'You Won - Boss Defeated');
+
+    AUDIO_MANAGER.stopAllMusic();
+    AUDIO_MANAGER.play("win");
+
     gameState.finishGame('sharkyGameWon');
     return true;
 }
@@ -721,7 +815,24 @@ function spawnGameBubble() {
     if (sharky.bubbleSpawned) return;
 
     createBubbleFromSharky(sharky);
+    playBubbleSound(sharky);
+
     sharky.bubbleSpawned = true;
+}
+
+/**
+ * Plays the matching bubble attack sound.
+ *
+ * @param {Object} sharky - The active Sharky object.
+ * @returns {void}
+ */
+function playBubbleSound(sharky) {
+    if (sharky.isPoisonBubbleAttack) {
+        AUDIO_MANAGER.play("poisonBubble");
+        return;
+    }
+
+    AUDIO_MANAGER.play("bubble");
 }
 
 
@@ -898,6 +1009,8 @@ function handleBubbleEnemyHit(bubble, enemy) {
  */
 function hitBossWithBubble(bubble, enemy) {
     enemy.hit(bubble.damage || 10);
+    AUDIO_MANAGER.play("bossHit");
+
     bubble.markedForDeletion = true;
 }
 
@@ -912,6 +1025,7 @@ function hitBossWithBubble(bubble, enemy) {
 function hitNormalEnemyWithBubble(bubble, enemy) {
     if (enemy.enemyType === 'jellyfish') {
         enemy.die();
+        AUDIO_MANAGER.play("enemyDead");
     }
 
     bubble.markedForDeletion = true;
