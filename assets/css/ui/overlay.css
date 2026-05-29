@@ -97,7 +97,7 @@
     margin: 0;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 900px), (max-height: 570px) {
 
     .game_overlay {
         z-index: 30;
@@ -119,7 +119,7 @@
         position: absolute;
         left: 0;
         right: 0;
-        bottom: 64px;
+        bottom: clamp(18px, 8vh, 64px);
         z-index: 30;
 
         display: flex;
