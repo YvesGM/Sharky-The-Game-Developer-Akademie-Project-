@@ -8,11 +8,12 @@ body {
 
 html {
     overflow-x: hidden;
+    overflow-y: hidden;
 }
 
 body {
     width: 100%;
-    min-height: 100vh;
+    max-height: 100vh;
 
     color: #ffffff;
     background:
@@ -29,7 +30,7 @@ main {
     justify-content: center;
 
     width: 100%;
-    min-height: 100vh;
+    max-height: 100vh;
 }
 
 .game_section {
@@ -112,7 +113,7 @@ main {
     position: relative;
     aspect-ratio: 16 / 9;
 
-    width: min(80vw, 1280px);
+    width: min(70vw, 1280px);
 
     background:
         linear-gradient(180deg, rgba(7, 22, 38, 0.96), rgba(0, 0, 0, 0.98));
@@ -152,8 +153,7 @@ main {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 32px;
-
+    
     width: 100%;
 }
 

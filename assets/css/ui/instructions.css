@@ -4,6 +4,7 @@
     align-items: center;
 
     width: min(80vw, 1280px);
+    gap: 6px;
 }
 
 .game_instructions {

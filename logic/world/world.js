@@ -14,7 +14,7 @@ import { COINS, POISONS } from "../../lib/configs/entities/collectibles.configs.
 import { BUBBLES, BUBBLE_IMAGES, POISON_BUBBLE_IMAGES } from "../../lib/configs/entities/bubble.configs.js";
 
 let camera_x = 0;
-let DEBUG_HITBOXES = true;
+let DEBUG_HITBOXES = false;
 
 const gameState = {
     status: 'running',
