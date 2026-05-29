@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="./assets/css/ui/instructions.css">
     <link rel="stylesheet" href="./assets/css/ui/legals.css">
 
+    <link rel="icon" href="./assets/img/favicon.ico">
     <title>Sharky - My Portfolio Game-Project</title>
 </head>
 
@@ -22,9 +23,20 @@
 
             <!-- Game Canvas -->
             <div class="game_wrapper">
+                <div id="loadingScreen" class="game_overlay loading_screen">
+                    <div class="loading_box">
+                        <h2>Loading...</h2>
+
+                        <div class="loading_bar">
+                            <div id="loadingBarFill" class="loading_bar_fill"></div>
+                        </div>
+
+                        <p id="loadingText">0%</p>
+                    </div>
+                </div>
                 <canvas id="gameCanvas" class="game_canvas"></canvas>
 
-                <div id="startScreen" class="game_overlay">
+                <div id="startScreen" class="game_overlay d_none">
                     <img id="startScreenImage" class="start_screen" alt="Start Screen">
                     <button type="button" id="startGameButton" class="image_button start_button">
                         <img id="startButtonImage" alt="Start Game">
@@ -125,7 +137,7 @@
                     <strong>Yves Gildemeister</strong><br>
                     Schulstraße 25<br>
                     07987 Mohlsdorf-Teichwolframsdorf<br>
-                    Thrüringen, Deutschland
+                    Thüringen, Deutschland
                 </p>
 
                 <p>

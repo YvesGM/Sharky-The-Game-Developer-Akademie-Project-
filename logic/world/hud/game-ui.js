@@ -27,6 +27,46 @@ export function hideStartScreen() {
 
 
 /**
+ * Shows the start screen.
+ *
+ * @returns {void}
+ */
+export function showStartScreen() {
+    document.getElementById("startScreen")?.classList.remove("d_none");
+}
+
+
+/**
+ * Hides the loading screen.
+ *
+ * @returns {void}
+ */
+export function hideLoadingScreen() {
+    document.getElementById("loadingScreen")?.classList.add("d_none");
+}
+
+
+/**
+ * Updates the loading screen progress.
+ *
+ * @param {number} progress - The loading progress.
+ * @returns {void}
+ */
+export function updateLoadingScreen(progress) {
+    const loadingBarFill = document.getElementById("loadingBarFill");
+    const loadingText = document.getElementById("loadingText");
+
+    if (loadingBarFill) {
+        loadingBarFill.style.width = `${progress}%`;
+    }
+
+    if (loadingText) {
+        loadingText.textContent = `${progress}%`;
+    }
+}
+
+
+/**
  * Shows the game over screen.
  *
  * @param {CustomEvent} event - The game over event.
@@ -109,7 +149,7 @@ function setControlImages() {
  * @returns {void}
  */
 function initGameButtons(onStart, onRestart, onFullscreen) {
-    addClickEvent("startGameButton", onStart, true);
+    addClickEvent("startGameButton", onStart);
     addClickEvent("restartGameButton", onRestart);
     addClickEvent("fullscreenGameButton", onFullscreen);
     addClickEvent("gameOverRestartButton", onRestart);

@@ -1,9 +1,10 @@
 import Keyboard from "../lib/classes/keyboard/keyboard.class.js";
 import loadCanvas from "./world/world.js";
-import { initGameUI, hideStartScreen } from "./world/hud/game-ui.js";
+import { initGameUI, hideStartScreen, hideLoadingScreen, showStartScreen, updateLoadingScreen } from "./world/hud/game-ui.js";
 import { AUDIO_MANAGER } from "../lib/configs/audio/audio.configs.js";
 import { initLegalUI } from "./world/legals/legal-ui.js";
 import { initSoundCreditsUI } from "./world/legals/sound-credits-ui.js";
+import { preloadGameImages } from "./world/image-preloader.js";
 
 let gameStarted = false;
 
@@ -22,9 +23,9 @@ const keyboardMap = {
 /**
  * Initializes the game setup after the page has loaded.
  *
- * @returns {void}
+ * @returns {Promise<void>}
  */
-function initializeSharky() {
+async function initializeSharky() {
     initMobileControls();
     initLegalUI();
     initSoundCreditsUI();
@@ -34,6 +35,11 @@ function initializeSharky() {
         onRestart: restartGame,
         onFullscreen: toggleFullscreen
     });
+
+    await preloadGameImages(updateLoadingScreen);
+
+    hideLoadingScreen();
+    showStartScreen();
 }
 
 
